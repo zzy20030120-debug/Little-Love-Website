@@ -323,12 +323,6 @@ body {
 }
 .back-btn:active { background: rgba(253,244,227,.2); }
 
-/* ── Visit counter ── */
-.visit-counter {
-  position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
-  font-size: 12px; color: rgba(253,244,227,.25);
-  letter-spacing: .04em; z-index: 1;
-}
 </style>
 </head>
 <body>
@@ -339,7 +333,6 @@ body {
 <div id="page-cover" class="page active">
   <h1 class="cover-title">给你的</h1>
   <p class="cover-hint">轻触屏幕</p>
-  <p class="visit-counter" id="visit-counter"></p>
 </div>
 
 <!-- ════ Page 2: Orbs ════ -->
@@ -1005,17 +998,9 @@ resizeBg();
 initParticles();
 
 // ═══════════════════════════════════════
-// Visit counter (CountAPI)
+// Visit counter (silent)
 // ═══════════════════════════════════════
-(function() {
-  const NS = 'little-love-site';
-  const KEY = 'views';
-  const counterEl = document.getElementById('visit-counter');
-  fetch(`https://api.countapi.xyz/hit/${NS}/${KEY}`)
-    .then(r => r.json())
-    .then(d => { counterEl.textContent = `第 ${d.value} 位访客`; })
-    .catch(() => { counterEl.style.display = 'none'; });
-})();
+fetch('https://api.countapi.xyz/hit/little-love-site/views').catch(() => {});
 </script>
 
 </body>
