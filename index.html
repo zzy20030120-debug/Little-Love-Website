@@ -320,10 +320,10 @@ body {
 
 <!-- ════ Page 3: Scratch ════ -->
 <div id="page-scratch" class="page">
-  <p class="scratch-hint" id="scratch-hint">用手擦一擦卡片</p>
+  <p class="scratch-hint" id="scratch-hint">擦一擦卡片</p>
   <div class="scratch-container" id="scratch-container">
     <div class="scratch-bg">
-      <span>对不起</span>
+      <span>小豆对不起</span>
     </div>
     <canvas class="scratch-canvas" id="scratch-canvas"></canvas>
   </div>
@@ -336,18 +336,18 @@ body {
     <div id="letter-text"></div>
     <span class="letter-cursor" id="letter-cursor">|</span>
   </div>
-  <button class="letter-done-btn" id="letter-done-btn">我读完了</button>
+  <button class="letter-done-btn" id="letter-done-btn">读完了</button>
 </div>
 
 <!-- ════ Page 5: Final ════ -->
 <div id="page-final" class="page">
   <span class="final-heart" id="final-heart">❤️</span>
-  <h2 class="final-title">原谅我好不好？</h2>
+  <h2 class="final-title">小豆可以原谅我吗？</h2>
   <div class="final-btns" id="final-btns">
-    <button class="btn-yes" id="btn-yes">好</button>
-    <button class="btn-no" id="btn-no">不要</button>
+    <button class="btn-yes" id="btn-yes">原谅zzy</button>
+    <button class="btn-no" id="btn-no">不要原谅他</button>
   </div>
-  <p class="final-thanks" id="final-thanks">谢谢你 💛</p>
+  <p class="final-thanks" id="final-thanks">谢谢你 ❤️</p>
 </div>
 
 <script>
@@ -460,11 +460,11 @@ const orbMsgEl = document.getElementById('orb-msg');
 const orbNextBtn = document.getElementById('orb-next-btn');
 
 const orbMessages = [
-  { emoji: '💫', text: '你笑起来最好看了' },
-  { emoji: '💭', text: '这几天一直在想你' },
+  { emoji: '💫', text: '爱你爱你' },
+  { emoji: '💭', text: '小豆我想你了' },
   { emoji: '🥺', text: '是我不好' },
   { emoji: '💛', text: '谢谢你包容我' },
-  { emoji: '✨', text: '以后我会更好的' },
+  { emoji: '✨', text: '以后我不这样了' },
   { emoji: '💝', text: '你是我最想珍惜的人' },
 ];
 
@@ -717,19 +717,19 @@ const letterCursor = document.getElementById('letter-cursor');
 const letterDoneBtn = document.getElementById('letter-done-btn');
 
 const letterContent = [
-  '这几天我想了很多。',
+  '这几天我一直想你。',
   '',
-  '有些话没说好，有些事没做好，让你难过了。不是本意，但还是伤害到了你。',
+  '前两天下雨我还担心你别被淋着了，后来想起，还好你周一不上班。',
   '',
-  '对不起。',
+  '我给你打电话了，但是不通。',
   '',
-  '和你在一起的每一天，都是我最珍惜的时光。你的笑容，你的声音，你的一切，对我来说都很重要。',
+  '无意翻到了我们刚认识的时候的照片。',
   '',
-  '我不想看到你难过，尤其不想是因为我。',
+  '简直是想你。你不在，我开心的事都没人分享，想给你看看我弄了什么。',
   '',
   '以后，我会更在意你的感受，更用心地对你。',
   '',
-  '你能原谅我吗？',
+  '小豆你能原谅我吗？',
 ];
 
 let typewriterRunning = false;
