@@ -270,14 +270,16 @@ body {
   position: relative;
 }
 .final-thanks {
-  font-size: 24px;
+  font-size: clamp(30px,8vw,42px);
+  font-weight: 300;
   color: var(--cream);
   letter-spacing: .08em;
+  text-shadow: 0 2px 20px rgba(212,165,116,.4);
   z-index: 2;
   opacity: 0;
   transition: opacity 1s;
-  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
   pointer-events: none;
+  margin-top: 20px;
 }
 .final-thanks.show { opacity: 1; }
 .final-heart {
@@ -802,9 +804,11 @@ let celebrationParticles = [];
 let celebrationRunning = false;
 
 function initFinal() {
+  document.querySelector('.final-title').style.display = '';
   btnNo.style.transform = '';
   finalBtns.style.opacity = '1';
   finalBtns.style.pointerEvents = 'auto';
+  finalBtns.style.display = '';
   finalHeart.classList.remove('show');
   finalThanks.classList.remove('show');
   btnYes.style.display = '';
@@ -901,8 +905,11 @@ function stopCelebration() {
 }
 
 btnYes.addEventListener('click', () => {
+  // Hide title and buttons
+  document.querySelector('.final-title').style.display = 'none';
   btnYes.style.display = 'none';
   btnNo.style.display = 'none';
+  finalBtns.style.display = 'none';
   finalHeart.classList.add('show');
   startCelebration();
   setTimeout(() => {
