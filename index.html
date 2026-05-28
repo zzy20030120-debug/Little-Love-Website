@@ -191,7 +191,7 @@ body {
 .letter-card {
   background: var(--card-bg);
   width: min(88vw,360px);
-  height: 55vh;
+  height: 47vh;
   max-height: 70vh;
   padding: 32px 28px;
   border-radius: 12px;
@@ -239,6 +239,7 @@ body {
   font-weight: 300;
   color: var(--cream);
   letter-spacing: .1em;
+  margin-right: -0.1em;
   text-shadow: 0 2px 20px rgba(212,165,116,.4);
   z-index: 2;
   margin-bottom: 40px;
@@ -277,6 +278,7 @@ body {
   font-weight: 300;
   color: var(--cream);
   letter-spacing: .08em;
+  margin-right: -0.08em;
   text-shadow: 0 2px 20px rgba(212,165,116,.4);
   z-index: 2;
   opacity: 0;
@@ -877,7 +879,7 @@ function startCelebration() {
 
   celebrationParticles = [];
   celebrationRunning = true;
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 50; i++) {
     celebrationParticles.push(createCelebrationParticle());
   }
   animCelebration();
@@ -886,15 +888,15 @@ function startCelebration() {
     const cx = window.innerWidth / 2;
     const cy = window.innerHeight / 2;
     const angle = Math.random() * Math.PI * 2;
-    const speed = Math.random() * 8 + 2;
+    const speed = Math.random() * 4 + 1;
     return {
       x: cx + (Math.random() - .5) * 100,
       y: cy + (Math.random() - .5) * 100,
       vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed - Math.random() * 4,
-      r: Math.random() * 4 + 2,
+      vy: Math.sin(angle) * speed - Math.random() * 2,
+      r: Math.random() * 5 + 2,
       alpha: 1,
-      decay: Math.random() * .015 + .008,
+      decay: Math.random() * .006 + .003,
       color: ['#f5c77e','#e8a87c','#f0d89c','#fdf4e3','#d4836e','#e6b8a2'][Math.floor(Math.random() * 6)],
     };
   }
@@ -905,7 +907,7 @@ function startCelebration() {
     for (const p of celebrationParticles) {
       p.x += p.vx;
       p.y += p.vy;
-      p.vy += .04; // gravity
+      p.vy += .015; // gravity
       p.alpha -= p.decay;
       if (p.alpha <= 0) continue;
       celebrationCtx.beginPath();
@@ -922,15 +924,15 @@ function startCelebration() {
     }
     celebrationParticles = celebrationParticles.filter(p => p.alpha > 0);
     if (celebrationParticles.length < 20) {
-      for (let i = 0; i < 30; i++) {
+      for (let i = 0; i < 20; i++) {
         celebrationParticles.push({
           x: window.innerWidth / 2 + (Math.random() - .5) * 200,
           y: window.innerHeight / 2,
-          vx: (Math.random() - .5) * 6,
-          vy: -(Math.random() * 6 + 2),
+          vx: (Math.random() - .5) * 3,
+          vy: -(Math.random() * 3 + 1),
           r: Math.random() * 5 + 2,
           alpha: 1,
-          decay: Math.random() * .012 + .006,
+          decay: Math.random() * .005 + .003,
           color: ['#f5c77e','#e8a87c','#f0d89c','#fdf4e3','#d4836e','#e6b8a2'][Math.floor(Math.random() * 6)],
         });
       }
