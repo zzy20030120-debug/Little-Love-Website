@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<title>给你的</title>
+<style>
+:root {
+  --gold: #d4a574;
+  --rose: #c97b6b;
+  --cream: #fdf4e3;
+  --dark: #3d2b1f;
+  --card-bg: rgba(255,248,240,.92);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: "PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background: #1a1a1a;
+  overflow: hidden;
+  height: 100dvh;
+  width: 100vw;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ── Global canvas ── */
+#bg-canvas {
+  position: fixed; top:0; left:0; width:100%; height:100%;
+  z-index: 0;
+}
+
+/* ── Pages ── */
+.page {
+  position: fixed; top:0; left:0; width:100%; height:100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 1;
+  opacity: 0; pointer-events: none;
+  transition: opacity .6s ease, transform .6s ease;
+  transform: translateY(20px);
+}
+.page.active {
+  opacity: 1; pointer-events: auto;
+  transform: translateY(0);
+}
+.page.exit {
+  opacity: 0; transform: translateY(-20px);
+}
+
+/* ── Page 1: Cover ── */
+.cover-title {
+  font-size: clamp(40px,10vw,64px);
+  font-weight: 300;
+  color: var(--cream);
+  letter-spacing: .15em;
+  text-shadow: 0 2px 20px rgba(212,165,116,.4);
+  z-index: 1;
+}
+.cover-hint {
+  margin-top: 32px;
+  font-size: 16px;
+  color: rgba(253,244,227,.6);
+  letter-spacing: .08em;
+  animation: pulse 2s ease-in-out infinite;
+  z-index: 1;
+}
+@keyframes pulse {
+  0%,100% { opacity: .5; }
+  50% { opacity: 1; }
+}
+
+/* ── Page 2: Orbs ── */
+#page-orbs { position: fixed; top:0; left:0; width:100%; height:100%; }
+.orb {
+  position: absolute;
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+  cursor: pointer;
+  transition: transform .15s ease;
+  background: radial-gradient(circle at 35% 35%, rgba(255,220,180,.8), rgba(212,165,116,.3));
+  box-shadow: 0 0 30px rgba(212,165,116,.5), 0 0 60px rgba(212,165,116,.2);
+  z-index: 2;
+}
+.orb:active { transform: scale(.9); }
+.orb.popped {
+  animation: popOrb .5s ease forwards;
+  pointer-events: none;
+}
+@keyframes popOrb {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.8); opacity: .6; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+.orb-counter {
+  position: fixed; top: 48px; left: 50%; transform: translateX(-50%);
+  font-size: 14px; color: rgba(253,244,227,.7);
+  letter-spacing: .06em;
+  z-index: 3;
+}
+.orb-message {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%) scale(.8);
+  background: var(--card-bg);
+  padding: 20px 32px;
+  border-radius: 16px;
+  font-size: 18px;
+  color: var(--dark);
+  letter-spacing: .05em;
+  text-align: center;
+  z-index: 10;
+  opacity: 0; pointer-events: none;
+  box-shadow: 0 8px 32px rgba(0,0,0,.12);
+  transition: opacity .3s, transform .3s;
+}
+.orb-message.show {
+  opacity: 1; transform: translate(-50%,-50%) scale(1);
+}
+.orb-btn {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+  background: rgba(253,244,227,.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(253,244,227,.25);
+  color: var(--cream);
+  padding: 12px 40px;
+  border-radius: 50px;
+  font-size: 16px;
+  letter-spacing: .06em;
+  cursor: pointer;
+  z-index: 3;
+  opacity: 0; pointer-events: none;
+  transition: opacity .5s, background .2s;
+}
+.orb-btn.visible { opacity: 1; pointer-events: auto; }
+.orb-btn:active { background: rgba(253,244,227,.25); }
+
+/* ── Page 3: Scratch ── */
+.scratch-container {
+  position: relative; width: 280px; height: 200px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 12px 40px rgba(0,0,0,.2);
+}
+.scratch-bg {
+  position: absolute; top:0; left:0; width:100%; height:100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 48px; font-weight: 700;
+  color: var(--dark);
+  letter-spacing: .12em;
+  background: linear-gradient(135deg, #fdf4e3 0%, #f7e8d0 100%);
+}
+.scratch-canvas {
+  position: absolute; top:0; left:0; width:100%; height:100%;
+  z-index: 2;
+  touch-action: none;
+}
+.scratch-hint {
+  position: fixed; top: 28%; left: 50%; transform: translateX(-50%);
+  font-size: 14px; color: rgba(253,244,227,.7);
+  letter-spacing: .05em;
+  text-align: center;
+  z-index: 5;
+  pointer-events: none;
+  transition: opacity .5s;
+}
+.scratch-hint.done { opacity: 0; }
+.scratch-next {
+  position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+  background: rgba(253,244,227,.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(253,244,227,.25);
+  color: var(--cream);
+  padding: 12px 40px;
+  border-radius: 50px;
+  font-size: 16px;
+  letter-spacing: .06em;
+  cursor: pointer;
+  z-index: 3;
+  opacity: 0; pointer-events: none;
+  transition: opacity .5s, background .2s;
+}
+.scratch-next.visible { opacity: 1; pointer-events: auto; }
+.scratch-next:active { background: rgba(253,244,227,.25); }
+
+/* ── Page 4: Letter ── */
+.letter-card {
+  background: var(--card-bg);
+  width: min(88vw,360px);
+  max-height: 70vh;
+  padding: 32px 28px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.15);
+  overflow-y: auto;
+  line-height: 2;
+  font-size: 16px;
+  color: var(--dark);
+  letter-spacing: .04em;
+  z-index: 1;
+  position: relative;
+}
+.letter-card p { margin-bottom: 12px; }
+.letter-card .signature { text-align: right; margin-top: 20px; color: var(--rose); }
+.letter-cursor {
+  display: inline;
+  animation: blink .8s step-end infinite;
+  color: var(--rose);
+}
+@keyframes blink {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.letter-done-btn {
+  margin-top: 24px;
+  background: rgba(253,244,227,.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(253,244,227,.25);
+  color: var(--cream);
+  padding: 12px 40px;
+  border-radius: 50px;
+  font-size: 16px;
+  letter-spacing: .06em;
+  cursor: pointer;
+  opacity: 0; pointer-events: none;
+  transition: opacity .5s, background .2s;
+  z-index: 1;
+}
+.letter-done-btn.visible { opacity: 1; pointer-events: auto; }
+.letter-done-btn:active { background: rgba(253,244,227,.25); }
+
+/* ── Page 5: Final ── */
+.final-title {
+  font-size: clamp(28px,7vw,40px);
+  font-weight: 300;
+  color: var(--cream);
+  letter-spacing: .1em;
+  text-shadow: 0 2px 20px rgba(212,165,116,.4);
+  z-index: 2;
+  margin-bottom: 40px;
+}
+.final-btns {
+  display: flex; gap: 24px; z-index: 2;
+  position: relative;
+}
+.btn-yes {
+  background: var(--rose);
+  color: #fff;
+  border: none;
+  padding: 16px 48px;
+  border-radius: 50px;
+  font-size: 20px;
+  letter-spacing: .08em;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(201,123,107,.4);
+  transition: transform .2s, box-shadow .2s;
+}
+.btn-yes:active { transform: scale(.96); box-shadow: 0 4px 16px rgba(201,123,107,.3); }
+.btn-no {
+  background: rgba(253,244,227,.12);
+  border: 1px solid rgba(253,244,227,.2);
+  color: rgba(253,244,227,.6);
+  padding: 16px 36px;
+  border-radius: 50px;
+  font-size: 16px;
+  letter-spacing: .06em;
+  cursor: pointer;
+  transition: all .35s cubic-bezier(.68,-.55,.27,1.55);
+  position: relative;
+}
+.final-thanks {
+  font-size: 24px;
+  color: var(--cream);
+  letter-spacing: .08em;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 1s;
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  pointer-events: none;
+}
+.final-thanks.show { opacity: 1; }
+.final-heart {
+  font-size: 80px;
+  z-index: 2;
+  opacity: 0;
+  animation: none;
+  position: absolute; top: 38%; left: 50%; transform: translate(-50%,-50%);
+  pointer-events: none;
+}
+.final-heart.show {
+  opacity: 1;
+  animation: heartBeat .6s ease forwards;
+}
+@keyframes heartBeat {
+  0% { transform: translate(-50%,-50%) scale(0); }
+  60% { transform: translate(-50%,-50%) scale(1.3); }
+  100% { transform: translate(-50%,-50%) scale(1); }
+}
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<!-- ════ Page 1: Cover ════ -->
+<div id="page-cover" class="page active">
+  <h1 class="cover-title">给你的</h1>
+  <p class="cover-hint">轻触屏幕</p>
+</div>
+
+<!-- ════ Page 2: Orbs ════ -->
+<div id="page-orbs" class="page">
+  <p class="orb-counter">已收集 <span id="orb-count">0</span> / 6</p>
+  <div class="orb-message" id="orb-msg"></div>
+  <button class="orb-btn" id="orb-next-btn">继续</button>
+</div>
+
+<!-- ════ Page 3: Scratch ════ -->
+<div id="page-scratch" class="page">
+  <p class="scratch-hint" id="scratch-hint">用手擦一擦卡片</p>
+  <div class="scratch-container" id="scratch-container">
+    <div class="scratch-bg">
+      <span>对不起</span>
+    </div>
+    <canvas class="scratch-canvas" id="scratch-canvas"></canvas>
+  </div>
+  <button class="scratch-next" id="scratch-next-btn">继续</button>
+</div>
+
+<!-- ════ Page 4: Letter ════ -->
+<div id="page-letter" class="page">
+  <div class="letter-card" id="letter-card">
+    <div id="letter-text"></div>
+    <span class="letter-cursor" id="letter-cursor">|</span>
+  </div>
+  <button class="letter-done-btn" id="letter-done-btn">我读完了</button>
+</div>
+
+<!-- ════ Page 5: Final ════ -->
+<div id="page-final" class="page">
+  <span class="final-heart" id="final-heart">❤️</span>
+  <h2 class="final-title">原谅我好不好？</h2>
+  <div class="final-btns" id="final-btns">
+    <button class="btn-yes" id="btn-yes">好</button>
+    <button class="btn-no" id="btn-no">不要</button>
+  </div>
+  <p class="final-thanks" id="final-thanks">谢谢你 💛</p>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// Background particles
+// ═══════════════════════════════════════
+const bgCanvas = document.getElementById('bg-canvas');
+const bgCtx = bgCanvas.getContext('2d');
+let bgW, bgH;
+const particles = [];
+
+function resizeBg() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  bgW = window.innerWidth;
+  bgH = window.innerHeight;
+  bgCanvas.width = bgW * dpr;
+  bgCanvas.height = bgH * dpr;
+  bgCanvas.style.width = bgW + 'px';
+  bgCanvas.style.height = bgH + 'px';
+  bgCtx.setTransform(1, 0, 0, 1, 0, 0);
+  bgCtx.scale(dpr, dpr);
+}
+
+function initParticles() {
+  particles.length = 0;
+  const count = Math.min(Math.floor((bgW * bgH) / 18000), 50);
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x: Math.random() * bgW,
+      y: Math.random() * bgH,
+      r: Math.random() * 1.8 + .6,
+      vx: (Math.random() - .5) * .35,
+      vy: (Math.random() - .5) * .35 - .15,
+      alpha: Math.random() * .5 + .2,
+      phase: Math.random() * Math.PI * 2,
+    });
+  }
+}
+
+function drawBg() {
+  bgCtx.clearRect(0, 0, bgW, bgH);
+  for (const p of particles) {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.alpha += Math.sin(Date.now() * .001 + p.phase) * .003;
+    p.alpha = Math.max(.12, Math.min(.55, p.alpha));
+    if (p.x < -10) p.x = bgW + 10;
+    if (p.x > bgW + 10) p.x = -10;
+    if (p.y < -10) p.y = bgH + 10;
+    if (p.y > bgH + 10) p.y = -10;
+
+    const grd = bgCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 4);
+    grd.addColorStop(0, `rgba(255,220,180,${p.alpha})`);
+    grd.addColorStop(1, 'rgba(255,180,140,0)');
+    bgCtx.beginPath();
+    bgCtx.arc(p.x, p.y, p.r * 4, 0, Math.PI * 2);
+    bgCtx.fillStyle = grd;
+    bgCtx.fill();
+  }
+}
+
+resizeBg();
+initParticles();
+(function animBg() {
+  drawBg();
+  requestAnimationFrame(animBg);
+})();
+window.addEventListener('resize', () => { resizeBg(); initParticles(); });
+
+// ═══════════════════════════════════════
+// Page manager
+// ═══════════════════════════════════════
+let currentPage = 0;
+const pages = [
+  document.getElementById('page-cover'),
+  document.getElementById('page-orbs'),
+  document.getElementById('page-scratch'),
+  document.getElementById('page-letter'),
+  document.getElementById('page-final'),
+];
+
+function goToPage(idx) {
+  if (idx === currentPage) return;
+  pages[currentPage].classList.remove('active');
+  pages[currentPage].classList.add('exit');
+  setTimeout(() => {
+    pages[currentPage].classList.remove('exit');
+  }, 600);
+  pages[idx].classList.add('active');
+  currentPage = idx;
+  if (idx === 1) initOrbs();
+  if (idx === 2) initScratch();
+  if (idx === 3) startTypewriter();
+  if (idx === 4) initFinal();
+}
+
+// ═══════════════════════════════════════
+// Page 1 → Page 2
+// ═══════════════════════════════════════
+document.getElementById('page-cover').addEventListener('click', () => {
+  if (currentPage === 0) goToPage(1);
+});
+
+// ═══════════════════════════════════════
+// Page 2: Floating orbs
+// ═══════════════════════════════════════
+const orbContainer = document.getElementById('page-orbs');
+const orbCountEl = document.getElementById('orb-count');
+const orbMsgEl = document.getElementById('orb-msg');
+const orbNextBtn = document.getElementById('orb-next-btn');
+
+const orbMessages = [
+  { emoji: '💫', text: '你笑起来最好看了' },
+  { emoji: '💭', text: '这几天一直在想你' },
+  { emoji: '🥺', text: '是我不好' },
+  { emoji: '💛', text: '谢谢你包容我' },
+  { emoji: '✨', text: '以后我会更好的' },
+  { emoji: '💝', text: '你是我最想珍惜的人' },
+];
+
+let orbData = [];
+let orbsCollected = 0;
+let orbAnimId = null;
+let orbMsgTimer = null;
+
+function createOrbEl(msg) {
+  const el = document.createElement('div');
+  el.className = 'orb';
+  el.textContent = msg.emoji;
+  el.style.cssText = `width:56px;height:56px;font-size:28px;`;
+  orbContainer.appendChild(el);
+  return el;
+}
+
+function initOrbs() {
+  orbContainer.querySelectorAll('.orb').forEach(e => e.remove());
+  orbData = [];
+  orbsCollected = 0;
+  orbCountEl.textContent = '0';
+  orbMsgEl.classList.remove('show');
+  orbNextBtn.classList.remove('visible');
+  if (orbMsgTimer) clearTimeout(orbMsgTimer);
+  if (orbAnimId) cancelAnimationFrame(orbAnimId);
+
+  const pw = window.innerWidth;
+  const ph = window.innerHeight;
+  const margin = 70;
+
+  orbMessages.forEach((msg, i) => {
+    const el = createOrbEl(msg);
+    const d = {
+      el, msg,
+      x: margin + Math.random() * (pw - margin * 2),
+      y: 100 + Math.random() * (ph - 200),
+      vx: (Math.random() - .5) * 1.2,
+      vy: (Math.random() - .5) * 1.2,
+      popped: false,
+    };
+    el.style.left = d.x + 'px';
+    el.style.top = d.y + 'px';
+    el.addEventListener('click', (e) => popOrb(d, e));
+    el.addEventListener('touchend', (e) => { e.preventDefault(); popOrb(d, e); });
+    orbData.push(d);
+  });
+
+  orbAnimId = requestAnimationFrame(animOrbs);
+}
+
+function popOrb(d, e) {
+  if (d.popped) return;
+  d.popped = true;
+  orbsCollected++;
+  orbCountEl.textContent = orbsCollected;
+
+  d.el.classList.add('popped');
+  setTimeout(() => { if (d.el.parentNode) d.el.remove(); }, 500);
+
+  // Show message
+  orbMsgEl.textContent = d.msg.text;
+  orbMsgEl.classList.add('show');
+  if (orbMsgTimer) clearTimeout(orbMsgTimer);
+  orbMsgTimer = setTimeout(() => {
+    orbMsgEl.classList.remove('show');
+  }, 2000);
+
+  if (orbsCollected >= orbData.length) {
+    setTimeout(() => orbNextBtn.classList.add('visible'), 800);
+  }
+}
+
+function animOrbs() {
+  const pw = window.innerWidth;
+  const ph = window.innerHeight;
+  const margin = 60;
+  for (const d of orbData) {
+    if (d.popped) continue;
+    d.x += d.vx;
+    d.y += d.vy;
+    if (d.x < margin || d.x > pw - margin) d.vx *= -1;
+    if (d.y < margin || d.y > ph - margin) d.vy *= -1;
+    d.x = Math.max(margin, Math.min(pw - margin, d.x));
+    d.y = Math.max(margin, Math.min(ph - margin, d.y));
+    d.el.style.left = d.x + 'px';
+    d.el.style.top = d.y + 'px';
+  }
+  orbAnimId = requestAnimationFrame(animOrbs);
+}
+
+orbNextBtn.addEventListener('click', () => {
+  if (orbAnimId) cancelAnimationFrame(orbAnimId);
+  goToPage(2);
+});
+
+// ═══════════════════════════════════════
+// Page 3: Scratch card
+// ═══════════════════════════════════════
+const scratchContainer = document.getElementById('scratch-container');
+const scratchCanvas = document.getElementById('scratch-canvas');
+const scratchCtx = scratchCanvas.getContext('2d');
+const scratchHint = document.getElementById('scratch-hint');
+const scratchNextBtn = document.getElementById('scratch-next-btn');
+
+const GRID = 18;
+let scratchGrid = [];
+let scratchRevealed = 0;
+let scratchTotal = 0;
+let scratchDone = false;
+
+function initScratch() {
+  const rect = scratchContainer.getBoundingClientRect();
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const w = rect.width;
+  const h = rect.height;
+  scratchCanvas.width = w * dpr;
+  scratchCanvas.height = h * dpr;
+  scratchCanvas.style.width = w + 'px';
+  scratchCanvas.style.height = h + 'px';
+  scratchCtx.setTransform(1, 0, 0, 1, 0, 0);
+  scratchCtx.scale(dpr, dpr);
+
+  // Draw coating
+  const grad = scratchCtx.createLinearGradient(0, 0, w, h);
+  grad.addColorStop(0, '#d4a574');
+  grad.addColorStop(.5, '#e0c7a8');
+  grad.addColorStop(1, '#c9976b');
+  scratchCtx.fillStyle = grad;
+  scratchCtx.fillRect(0, 0, w, h);
+
+  // Overlay subtle pattern
+  scratchCtx.fillStyle = 'rgba(255,255,255,.06)';
+  for (let i = 0; i < 30; i++) {
+    scratchCtx.beginPath();
+    scratchCtx.arc(Math.random() * w, Math.random() * h, Math.random() * 8 + 2, 0, Math.PI * 2);
+    scratchCtx.fill();
+  }
+
+  // Text on coating
+  scratchCtx.fillStyle = 'rgba(255,248,240,.5)';
+  scratchCtx.font = '14px "PingFang SC","Microsoft YaHei",sans-serif';
+  scratchCtx.textAlign = 'center';
+  scratchCtx.fillText('刮开这里', w / 2, h / 2 + 5);
+
+  // Grid tracking
+  const cols = GRID;
+  const rows = Math.floor(GRID * (h / w));
+  scratchGrid = new Array(cols * rows).fill(false);
+  scratchRevealed = 0;
+  scratchTotal = cols * rows;
+  scratchDone = false;
+  scratchHint.classList.remove('done');
+  scratchNextBtn.classList.remove('visible');
+}
+
+function scratchAt(clientX, clientY) {
+  if (scratchDone) return;
+  const rect = scratchCanvas.getBoundingClientRect();
+  const x = clientX - rect.left;
+  const y = clientY - rect.top;
+  const w = rect.width;
+  const h = rect.height;
+  if (x < 0 || y < 0 || x > w || y > h) return;
+
+  scratchCtx.globalCompositeOperation = 'destination-out';
+  scratchCtx.beginPath();
+  scratchCtx.arc(x, y, 22, 0, Math.PI * 2);
+  scratchCtx.fill();
+  scratchCtx.globalCompositeOperation = 'source-over';
+
+  // Track grid cells
+  const cols = GRID;
+  const rows = Math.floor(GRID * (h / w));
+  const cellW = w / cols;
+  const cellH = h / rows;
+  const r = 22;
+  const minCol = Math.max(0, Math.floor((x - r) / cellW));
+  const maxCol = Math.min(cols - 1, Math.floor((x + r) / cellW));
+  const minRow = Math.max(0, Math.floor((y - r) / cellH));
+  const maxRow = Math.min(rows - 1, Math.floor((y + r) / cellH));
+
+  for (let col = minCol; col <= maxCol; col++) {
+    for (let row = minRow; row <= maxRow; row++) {
+      const idx = row * cols + col;
+      if (!scratchGrid[idx]) {
+        scratchGrid[idx] = true;
+        scratchRevealed++;
+      }
+    }
+  }
+
+  const pct = scratchRevealed / scratchTotal;
+  if (pct > .5) {
+    scratchHint.classList.add('done');
+  }
+  if (pct > .6 && !scratchDone) {
+    finishScratch();
+  }
+}
+
+function finishScratch() {
+  scratchDone = true;
+  scratchHint.classList.add('done');
+  // Animate coating away
+  const w = scratchContainer.getBoundingClientRect().width;
+  const h = scratchContainer.getBoundingClientRect().height;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  let alpha = 1;
+  const fadeOut = () => {
+    alpha -= .06;
+    if (alpha <= 0) {
+      scratchCtx.clearRect(0, 0, w * dpr, h * dpr);
+      scratchNextBtn.classList.add('visible');
+      return;
+    }
+    scratchCtx.clearRect(0, 0, w * dpr, h * dpr);
+    scratchCtx.globalAlpha = alpha;
+    const grad = scratchCtx.createLinearGradient(0, 0, w, h);
+    grad.addColorStop(0, '#d4a574');
+    grad.addColorStop(1, '#c9976b');
+    scratchCtx.fillStyle = grad;
+    scratchCtx.fillRect(0, 0, w, h);
+    scratchCtx.globalAlpha = 1;
+    requestAnimationFrame(fadeOut);
+  };
+  fadeOut();
+}
+
+scratchCanvas.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  for (const t of e.touches) scratchAt(t.clientX, t.clientY);
+}, { passive: false });
+scratchCanvas.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  for (const t of e.touches) scratchAt(t.clientX, t.clientY);
+}, { passive: false });
+scratchCanvas.addEventListener('mousemove', (e) => {
+  if (e.buttons) scratchAt(e.clientX, e.clientY);
+});
+scratchCanvas.addEventListener('mousedown', (e) => scratchAt(e.clientX, e.clientY));
+
+scratchNextBtn.addEventListener('click', () => goToPage(3));
+
+// ═══════════════════════════════════════
+// Page 4: Typewriter letter
+// ═══════════════════════════════════════
+const letterTextEl = document.getElementById('letter-text');
+const letterCursor = document.getElementById('letter-cursor');
+const letterDoneBtn = document.getElementById('letter-done-btn');
+
+const letterContent = [
+  '这几天我想了很多。',
+  '',
+  '有些话没说好，有些事没做好，让你难过了。不是本意，但还是伤害到了你。',
+  '',
+  '对不起。',
+  '',
+  '和你在一起的每一天，都是我最珍惜的时光。你的笑容，你的声音，你的一切，对我来说都很重要。',
+  '',
+  '我不想看到你难过，尤其不想是因为我。',
+  '',
+  '以后，我会更在意你的感受，更用心地对你。',
+  '',
+  '你能原谅我吗？',
+];
+
+let typewriterRunning = false;
+
+function startTypewriter() {
+  letterTextEl.innerHTML = '';
+  letterCursor.style.display = 'inline';
+  letterDoneBtn.classList.remove('visible');
+  typewriterRunning = true;
+
+  const fullText = letterContent.join('\n');
+  let i = 0;
+  const paragraphs = [];
+  let currentP = '';
+  for (let j = 0; j <= fullText.length; j++) {
+    if (j === fullText.length || fullText[j] === '\n') {
+      if (currentP || j < fullText.length) paragraphs.push(currentP);
+      currentP = '';
+    } else {
+      currentP += fullText[j];
+    }
+  }
+
+  let charIdx = 0;
+  let pIdx = 0;
+  let pEl = null;
+
+  function type() {
+    if (!typewriterRunning) return;
+    if (pIdx >= paragraphs.length) {
+      letterCursor.style.display = 'none';
+      letterDoneBtn.classList.add('visible');
+      return;
+    }
+    if (charIdx === 0) {
+      pEl = document.createElement('p');
+      letterTextEl.appendChild(pEl);
+    }
+    const text = paragraphs[pIdx];
+    if (charIdx < text.length) {
+      pEl.textContent += text[charIdx];
+      charIdx++;
+      letterTextEl.parentElement.scrollTop = letterTextEl.parentElement.scrollHeight;
+      setTimeout(type, 45 + Math.random() * 35);
+    } else {
+      charIdx = 0;
+      pIdx++;
+      setTimeout(type, 120);
+    }
+  }
+  type();
+}
+
+letterDoneBtn.addEventListener('click', () => {
+  typewriterRunning = false;
+  goToPage(4);
+});
+
+// ═══════════════════════════════════════
+// Page 5: Final
+// ═══════════════════════════════════════
+const btnYes = document.getElementById('btn-yes');
+const btnNo = document.getElementById('btn-no');
+const finalBtns = document.getElementById('final-btns');
+const finalHeart = document.getElementById('final-heart');
+const finalThanks = document.getElementById('final-thanks');
+const pageFinal = document.getElementById('page-final');
+
+let celebrationCanvas = null;
+let celebrationCtx = null;
+let celebrationParticles = [];
+let celebrationRunning = false;
+
+function initFinal() {
+  btnNo.style.transform = '';
+  finalBtns.style.opacity = '1';
+  finalBtns.style.pointerEvents = 'auto';
+  finalHeart.classList.remove('show');
+  finalThanks.classList.remove('show');
+  btnYes.style.display = '';
+  btnNo.style.display = '';
+  stopCelebration();
+  removeCelebrationCanvas();
+}
+
+function removeCelebrationCanvas() {
+  if (celebrationCanvas && celebrationCanvas.parentNode) {
+    celebrationCanvas.remove();
+  }
+  celebrationCanvas = null;
+}
+
+function startCelebration() {
+  celebrationCanvas = document.createElement('canvas');
+  celebrationCanvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:5;pointer-events:none;';
+  document.body.appendChild(celebrationCanvas);
+  celebrationCtx = celebrationCanvas.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  celebrationCanvas.width = window.innerWidth * dpr;
+  celebrationCanvas.height = window.innerHeight * dpr;
+  celebrationCtx.setTransform(1, 0, 0, 1, 0, 0);
+  celebrationCtx.scale(dpr, dpr);
+
+  celebrationParticles = [];
+  celebrationRunning = true;
+  for (let i = 0; i < 100; i++) {
+    celebrationParticles.push(createCelebrationParticle());
+  }
+  animCelebration();
+
+  function createCelebrationParticle() {
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+    const angle = Math.random() * Math.PI * 2;
+    const speed = Math.random() * 8 + 2;
+    return {
+      x: cx + (Math.random() - .5) * 100,
+      y: cy + (Math.random() - .5) * 100,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - Math.random() * 4,
+      r: Math.random() * 4 + 2,
+      alpha: 1,
+      decay: Math.random() * .015 + .008,
+      color: ['#f5c77e','#e8a87c','#f0d89c','#fdf4e3','#d4836e','#e6b8a2'][Math.floor(Math.random() * 6)],
+    };
+  }
+
+  function animCelebration() {
+    if (!celebrationRunning) return;
+    celebrationCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    for (const p of celebrationParticles) {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += .04; // gravity
+      p.alpha -= p.decay;
+      if (p.alpha <= 0) continue;
+      celebrationCtx.beginPath();
+      celebrationCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      celebrationCtx.fillStyle = p.color.replace(')', `,${p.alpha})`).replace('rgb', 'rgba');
+      if (p.color.startsWith('#')) {
+        const hex = p.color;
+        const rr = parseInt(hex.slice(1,3), 16);
+        const gg = parseInt(hex.slice(3,5), 16);
+        const bb = parseInt(hex.slice(5,7), 16);
+        celebrationCtx.fillStyle = `rgba(${rr},${gg},${bb},${p.alpha})`;
+      }
+      celebrationCtx.fill();
+    }
+    celebrationParticles = celebrationParticles.filter(p => p.alpha > 0);
+    if (celebrationParticles.length < 20) {
+      for (let i = 0; i < 30; i++) {
+        celebrationParticles.push({
+          x: window.innerWidth / 2 + (Math.random() - .5) * 200,
+          y: window.innerHeight / 2,
+          vx: (Math.random() - .5) * 6,
+          vy: -(Math.random() * 6 + 2),
+          r: Math.random() * 5 + 2,
+          alpha: 1,
+          decay: Math.random() * .012 + .006,
+          color: ['#f5c77e','#e8a87c','#f0d89c','#fdf4e3','#d4836e','#e6b8a2'][Math.floor(Math.random() * 6)],
+        });
+      }
+    }
+    requestAnimationFrame(animCelebration);
+  }
+}
+
+function stopCelebration() {
+  celebrationRunning = false;
+  celebrationParticles = [];
+}
+
+btnYes.addEventListener('click', () => {
+  btnYes.style.display = 'none';
+  btnNo.style.display = 'none';
+  finalHeart.classList.add('show');
+  startCelebration();
+  setTimeout(() => {
+    finalThanks.classList.add('show');
+  }, 600);
+});
+
+function runAway() {
+  const rangeX = window.innerWidth * .35;
+  const rangeY = window.innerHeight * .3;
+  const tx = (Math.random() - .5) * rangeX * 2;
+  const ty = (Math.random() - .5) * rangeY * 2;
+  btnNo.style.transform = `translate(${tx}px, ${ty}px)`;
+}
+
+btnNo.addEventListener('mouseenter', runAway);
+btnNo.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  runAway();
+});
+
+// ═══════════════════════════════════════
+// Init
+// ═══════════════════════════════════════
+resizeBg();
+initParticles();
+</script>
+
+</body>
+</html>
