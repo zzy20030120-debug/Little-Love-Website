@@ -290,11 +290,11 @@ body {
 }
 .final-thanks.show { opacity: 1; }
 .final-heart {
-  font-size: 80px;
+  width: 140px;
+  height: auto;
   z-index: 2;
   opacity: 0;
-  animation: none;
-  position: absolute; top: 38%; left: 50%; transform: translate(-50%,-50%);
+  position: absolute; top: 35%; left: 50%; transform: translate(-50%,-50%);
   pointer-events: none;
 }
 .final-heart.show {
@@ -368,7 +368,22 @@ body {
 <!-- ════ Page 5: Final ════ -->
 <div id="page-final" class="page">
   <button class="back-btn">← 返回</button>
-  <span class="final-heart" id="final-heart">❤️</span>
+  <svg class="final-heart" id="final-heart" viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="60" cy="105" rx="28" ry="30" fill="#d4a574"/>
+  <circle cx="60" cy="55" r="32" fill="#d4a574"/>
+  <circle cx="33" cy="30" r="14" fill="#d4a574"/>
+  <circle cx="33" cy="30" r="8" fill="#e8c8a8"/>
+  <circle cx="87" cy="30" r="14" fill="#d4a574"/>
+  <circle cx="87" cy="30" r="8" fill="#e8c8a8"/>
+  <circle cx="48" cy="52" r="4" fill="#3d2b1f"/>
+  <circle cx="72" cy="52" r="4" fill="#3d2b1f"/>
+  <ellipse cx="60" cy="62" rx="5" ry="3.5" fill="#3d2b1f"/>
+  <ellipse cx="38" cy="60" rx="6" ry="3.5" fill="#e8a0a0" opacity=".5"/>
+  <ellipse cx="82" cy="60" rx="6" ry="3.5" fill="#e8a0a0" opacity=".5"/>
+  <ellipse cx="38" cy="90" rx="10" ry="8" fill="#d4a574"/>
+  <ellipse cx="82" cy="90" rx="10" ry="8" fill="#d4a574"/>
+  <text x="60" y="98" text-anchor="middle" font-size="32">❤️</text>
+</svg>
   <h2 class="final-title">小豆可以原谅我吗？</h2>
   <div class="final-btns" id="final-btns">
     <button class="btn-yes" id="btn-yes">原谅zzy</button>
